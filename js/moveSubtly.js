@@ -22,20 +22,22 @@
 					overflow:"hidden"
 				}
 				
-				var imgCSS = $this.attr("style"); //- get all styles on image
-				imgCSS = imgCSS.substring(0,imgCSS.length-1);
-				var styles = imgCSS.split('; ');
-				// use just ; (no space) then remove spaces (or remove spaces first)
-											
-				var imgCSSobj = {}; //- convert image css from a string into an object
-				styles.forEach(function(style) {
-					var tup = style.split(':');
-					imgCSSobj[tup[0]] = tup[1].toString();
-				});
-								
-				containerCSS = $.extend(containerCSS,imgCSSobj); //- merge styles
-								
-				//containerCSS[overflow] = "hidden"; //- overflow has to be hidden, so we override that last step
+				if ($this.attr("style")) { //- if the image has styles, get all styles and apply them to the container div
+					var imgCSS = $this.attr("style");
+					imgCSS = imgCSS.substring(0,imgCSS.length-1);
+					var styles = imgCSS.split('; ');
+					// use just ; (no space) then remove spaces (or remove spaces first)
+												
+					var imgCSSobj = {}; //- convert image css from a string into an object
+					styles.forEach(function(style) {
+						var tup = style.split(':');
+						imgCSSobj[tup[0]] = tup[1].toString();
+					});
+									
+					containerCSS = $.extend(containerCSS,imgCSSobj); //- merge styles
+									
+					//containerCSS[overflow] = "hidden"; //- overflow has to be hidden, so we override that last step
+				}
 				
 				$this.removeAttr("style"); //- remove styles from image because they're on the container now
 				$this.css({"position":"absolute","z-index":"1","width":"100%","height":"100%"}).wrap("<div />"); //- set some css on the image and then wrap it with a div container
