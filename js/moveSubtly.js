@@ -11,13 +11,20 @@
 				var imgWidth = $this.width(); //- get image width and height
 				var imgHeight = $this.height();
 				
+				var imgUnit = $this.css("width"); //- check for percentage-based image sizes (TO DO: account for ems, and other units)
+				if (imgUnit.indexOf("%") > 0) {
+					imgWidth += "%";
+				} else {
+					imgWidth += "px";
+				}
+				
 				var imgPosition = $this.css("position"); //- get position to apply to outer div
 				if (!imgPosition || imgPosition == "static") { imgPosition = "relative"; } //- set position to 'relative' if there is no position set
 				
 				var containerCSS = { //- set default CSS needed to make container work
 					display:"inline-block",
-					width:imgWidth+"px",
-					height:imgHeight+"px",
+					width:imgWidth,
+					height:imgHeight,
 					position:imgPosition,
 					overflow:"hidden"
 				}
@@ -36,14 +43,28 @@
 									
 					containerCSS = $.extend(containerCSS,imgCSSobj); //- merge styles
 									
-					//containerCSS[overflow] = "hidden"; //- overflow has to be hidden, so we override that last step
+					containerCSS["overflow"] = "hidden"; //- overflow has to be hidden, so we override that as a last step
+					
+					// MAYBE JUST DO THIS ON RESIZE
+					/* var imgUnit = containerCSS.width; //- check for percentage-based image sizes (TO DO: account for ems, and other units)
+					if (imgUnit.indexOf("%") > 0) {
+						var imgRatio = parseInt(imgHeight)/parseInt(imgWidth)*parseInt(imgUnit); //- convert height to %
+						imgWidth = imgUnit;
+						imgHeight = imgRatio;
+						imgHeight += "%";
+						containerCSS["width"] = imgWidth;
+						containerCSS["height"] = imgHeight;
+					} */
+					
 				}
 				
 				$this.removeAttr("style"); //- remove styles from image because they're on the container now
-				$this.css({"position":"absolute","z-index":"1","width":"100%","height":"100%"}).wrap("<div />"); //- set some css on the image and then wrap it with a div container
+				$this.css({"position":"absolute","z-index":"1","width":"100%","height":"100%"}).wrap("<div class='move-subtly' />"); //- set some css on the image and then wrap it with a div container
 				$this.parent("div").css(containerCSS);
 				
 				moveSubtly($this); //- set the image in motion
+				
+				$(window).resize(function() { resizePercentageBasedImages($this.parent("div"),containerCSS.width,imgWidth,imgHeight); });
 			});
 			
 		});
@@ -88,6 +109,18 @@
 					}});
 				},options.stillTime);
 			}});
+		}
+		
+		//- make percentage-based images responsive		
+		function resizePercentageBasedImages(container,containerWidth,imgWidth,imgHeight) {
+			var newWidth = container.css("width");
+			if (containerWidth.indexOf("%") > 0) {
+				var imgRatio = parseInt(imgWidth)/parseInt(imgHeight)*parseInt(newWidth); //- convert height to %
+				imgHeight = imgRatio;
+				imgHeight += "px";
+				
+				container.css("height",imgHeight);
+			}
 		}
 		
 		return this;
