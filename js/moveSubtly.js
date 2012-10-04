@@ -45,26 +45,17 @@
 									
 					containerCSS["overflow"] = "hidden"; //- overflow has to be hidden, so we override that as a last step
 					
-					// MAYBE JUST DO THIS ON RESIZE
-					/* var imgUnit = containerCSS.width; //- check for percentage-based image sizes (TO DO: account for ems, and other units)
-					if (imgUnit.indexOf("%") > 0) {
-						var imgRatio = parseInt(imgHeight)/parseInt(imgWidth)*parseInt(imgUnit); //- convert height to %
-						imgWidth = imgUnit;
-						imgHeight = imgRatio;
-						imgHeight += "%";
-						containerCSS["width"] = imgWidth;
-						containerCSS["height"] = imgHeight;
-					} */
-					
 				}
 				
 				$this.removeAttr("style"); //- remove styles from image because they're on the container now
 				$this.css({"position":"absolute","z-index":"1","width":"100%","height":"100%"}).wrap("<div class='move-subtly' />"); //- set some css on the image and then wrap it with a div container
 				$this.parent("div").css(containerCSS);
 				
+				var imgRatio = parseInt(containerCSS.width)/parseInt(containerCSS.height);
+				if (containerCSS.width.indexOf("%") > 0) { $this.parent("div").addClass("move-subtly-scale").attr("data-ratio",imgRatio); } //- add a class if the image should scale (if width is a percentage), then add the image ratio to scale by as a data- attribute
+				
 				moveSubtly($this); //- set the image in motion
 				
-				$(window).resize(function() { resizePercentageBasedImages($this.parent("div"),containerCSS.width,imgWidth,imgHeight); });
 			});
 			
 		});
@@ -111,17 +102,13 @@
 			}});
 		}
 		
-		//- make percentage-based images responsive		
-		function resizePercentageBasedImages(container,containerWidth,imgWidth,imgHeight) {
-			var newWidth = container.css("width");
-			if (containerWidth.indexOf("%") > 0) {
-				var imgRatio = parseInt(imgWidth)/parseInt(imgHeight)*parseInt(newWidth); //- convert height to %
-				imgHeight = imgRatio;
-				imgHeight += "px";
-				
-				container.css("height",imgHeight);
-			}
-		}
+		$(window).resize(function() { //- resize images that were set to percentage heights, simulating percentage scaling
+			$(".move-subtly-scale").each(function() {
+				var imgRatio = $(this).attr("data-ratio");
+				var newHeight = $(this).width()-($(this).width()*imgRatio);
+				$(this).css("height",newHeight+"px");
+			});
+		});
 		
 		return this;
 	};
